@@ -1,14 +1,23 @@
-# template-mcp
+# Path of Exile 2 MCP Server
 
-`template-mcp` is a Go template for building [Model Context Protocol](https://modelcontextprotocol.io) (MCP) servers.
-It is built on the official [`modelcontextprotocol/go-sdk`](https://github.com/modelcontextprotocol/go-sdk) and ships with the protocol and security best practices that an MCP server should have on day one.
+`poe2-mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) (MCP)
+server for [Path of Exile 2](https://www.pathofexile.com) — an AI gateway into
+the PoE marketplace. It authenticates and communicates with the official PoE API
+(and other third-party services as needed) to help with pricing, market
+research, and gearing, with the longer-term goal of native integration with
+third-party tools such as build sites and [Path of Building](https://pathofbuilding.community/).
+It is built on the official [`modelcontextprotocol/go-sdk`](https://github.com/modelcontextprotocol/go-sdk)
+and ships with the protocol and security best practices that an MCP server should have on day one.
 
-The template exposes a single demo tool, `random_int`, and demonstrates serving it over two transports from the same server code:
+> **Status:** early scaffolding. The server currently exposes a single demo
+> tool, `random_int`, while the marketplace tooling is built out.
 
-- **Local** — the STDIO transport (`template-mcp stdio`), which clients spawn as a subprocess.
-- **Networked** — the Streamable HTTP transport (`template-mcp http`), suitable for remote and containerized deployments.
+It serves its tools over two transports from the same server code:
 
-Generated projects keep the transport they need and delete the other (see [Choosing a transport](#choosing-a-transport)).
+- **Local** — the STDIO transport (`poe2-mcp stdio`), which clients spawn as a subprocess.
+- **Networked** — the Streamable HTTP transport (`poe2-mcp http`), suitable for remote and containerized deployments.
+
+You can keep the transport you need and delete the other (see [Choosing a transport](#choosing-a-transport)).
 
 ## Local Bootstrap
 
@@ -34,28 +43,18 @@ proto install moon
 proto install
 ```
 
-After creating a new repository from this template, replace the placeholder names before doing feature work:
-
-```sh
-go mod edit -module github.com/meigma/YOUR_REPO
-mv cmd/template-mcp cmd/YOUR_BINARY
-```
-
-Then update `template-mcp` references in the Moon tasks, GoReleaser config, `ghd.toml`, README, and package docs.
-The full first-setup checklist lives in [DELETE_ME.md](DELETE_ME.md).
-
 ## Running the Server
 
 Run the server over STDIO (the mode a local MCP client launches):
 
 ```sh
-go run ./cmd/template-mcp stdio
+go run ./cmd/poe2-mcp stdio
 ```
 
 Run the server over Streamable HTTP, bound to loopback by default:
 
 ```sh
-go run ./cmd/template-mcp http --addr localhost:8080
+go run ./cmd/poe2-mcp http --addr localhost:8080
 ```
 
 Both subcommands build the same `internal/mcpserver` server and differ only in how they connect it to a transport.
@@ -68,7 +67,7 @@ See [tools/proxy/README.md](tools/proxy/README.md) for how it works and its flag
 
 ## The Demo Tool
 
-The template registers one tool, `random_int`, in `internal/mcpserver`.
+The server registers one demo tool, `random_int`, in `internal/mcpserver`.
 It takes `min` and `max` arguments and returns a uniformly random integer in the inclusive range `[min, max]`.
 
 The tool is deliberately small but exercises the parts of the protocol you are most likely to use:
@@ -79,7 +78,7 @@ The tool is deliberately small but exercises the parts of the protocol you are m
 
 Replace `random_int` with your own tool, or add more tools alongside it. The server and transport code do not change when you do.
 
-A tool that needs shared collaborators (a database handle, an HTTP client, a config struct) gets them through the `Dependencies` struct on `mcpserver.Options`: add fields there, and each `registerXxx` function receives them via `Options.Deps`. Because dependencies flow through `Options`, the server stays transport-agnostic. See the [Add a tool](https://meigma.github.io/template-mcp/add-a-tool/) guide for a worked example.
+A tool that needs shared collaborators (a database handle, an HTTP client, a config struct) gets them through the `Dependencies` struct on `mcpserver.Options`: add fields there, and each `registerXxx` function receives them via `Options.Deps`. Because dependencies flow through `Options`, the server stays transport-agnostic. See the [Add a tool](https://jmgilman.github.io/poe/add-a-tool/) guide for a worked example.
 
 ## Choosing a Transport
 
@@ -92,9 +91,9 @@ To keep only one transport, delete the unused file and remove its single registr
 
 ## Security & Best Practices
 
-The template bakes in the practices that an MCP server must have. Preserve them as you build on it.
+This project bakes in the practices that an MCP server must have. Preserve them as you build on it.
 
-- **stdout is reserved for JSON-RPC.** Over the STDIO transport, stdout carries protocol messages only. Writing anything else to stdout — a stray `fmt.Println`, a logger pointed at `os.Stdout` — silently corrupts the stream and is the most common way a stdio server breaks. The template logs to `os.Stderr` only; keep all logging and diagnostics on stderr.
+- **stdout is reserved for JSON-RPC.** Over the STDIO transport, stdout carries protocol messages only. Writing anything else to stdout — a stray `fmt.Println`, a logger pointed at `os.Stdout` — silently corrupts the stream and is the most common way a stdio server breaks. The server logs to `os.Stderr` only; keep all logging and diagnostics on stderr.
 - **Origin verification and a loopback default for HTTP.** The `http` transport wraps the SDK handler in the standard library's cross-origin protection to defend against DNS-rebinding and CSRF from browsers, and `--addr` defaults to `localhost:8080`. Binding to a non-loopback address exposes the server to the network and is an explicit, security-relevant decision.
 - **The HTTP transport fails closed off loopback.** Cross-origin protection stops malicious browsers, not direct clients such as `curl`. So binding a non-loopback address (for example `0.0.0.0`) with no authentication is refused at startup unless you either set `--auth-token` or pass `--insecure` to opt into an unauthenticated, network-exposed server. The container image defaults to `--insecure` so the demo runs out of the box; remove it and supply real authentication before deploying.
 - **The bearer-auth seam is demo-only.** The HTTP transport includes a minimal, flag-gated bearer-token check that is off by default and exists to show where authorization belongs. It is not production authorization. A production server needs a real OAuth 2.1 resource server: protected-resource metadata (RFC 9728), audience-restricted tokens (RFC 8707), and PKCE with S256. Validate token signature, expiry, and audience against a trusted authorization server.
@@ -125,16 +124,16 @@ Preview the documentation site locally with live reload:
 moon run docs:serve        # serves on http://127.0.0.1:8000
 ```
 
-The CLI entrypoint uses Cobra and Viper in the same shape as other Meigma CLIs: `cmd/template-mcp` stays thin, `internal/cli` owns command construction, and Viper-backed flags such as the HTTP address can also be supplied through `TEMPLATE_MCP_*` environment variables.
+The CLI entrypoint uses Cobra and Viper in a conventional shape: `cmd/poe2-mcp` stays thin, `internal/cli` owns command construction, and Viper-backed flags such as the HTTP address can also be supplied through `POE2_MCP_*` environment variables.
 
 ```sh
-go run ./cmd/template-mcp --version
-go run ./cmd/template-mcp stdio
-go run ./cmd/template-mcp http --addr localhost:8080
+go run ./cmd/poe2-mcp --version
+go run ./cmd/poe2-mcp stdio
+go run ./cmd/poe2-mcp http --addr localhost:8080
 go test ./...
 ```
 
-A local build reports `template-mcp dev (none) built unknown` — GoReleaser
+A local build reports `poe2-mcp dev (none) built unknown` — GoReleaser
 injects the real version, commit, and date at release time.
 
 ## Logging and Observability
@@ -144,15 +143,15 @@ for JSON-RPC). Two persistent flags control logging, and each is also settable
 through an environment variable:
 
 ```sh
-go run ./cmd/template-mcp http --log-level debug --log-format json
-TEMPLATE_MCP_LOG_LEVEL=debug go run ./cmd/template-mcp stdio
+go run ./cmd/poe2-mcp http --log-level debug --log-format json
+POE2_MCP_LOG_LEVEL=debug go run ./cmd/poe2-mcp stdio
 ```
 
-- `--log-level` (`TEMPLATE_MCP_LOG_LEVEL`): `debug`, `info` (default), `warn`, or `error`.
-- `--log-format` (`TEMPLATE_MCP_LOG_FORMAT`): `text` (default) or `json`.
+- `--log-level` (`POE2_MCP_LOG_LEVEL`): `debug`, `info` (default), `warn`, or `error`.
+- `--log-format` (`POE2_MCP_LOG_FORMAT`): `text` (default) or `json`.
 
 The http transport logs a `listening` line on startup and a clean-shutdown pair
-on exit. Metrics and tracing are intentionally out of scope for the template;
+on exit. Metrics and tracing are intentionally out of scope for now;
 the `Options.Logger` seam in `internal/mcpserver` is where richer instrumentation
 would attach.
 
@@ -162,8 +161,8 @@ The included Dockerfile builds a static Linux binary and copies it into a non-ro
 
 ```sh
 docker build --target test .
-docker build -t template-mcp:dev .
-docker run --rm template-mcp:dev --version
+docker build -t poe2-mcp:dev .
+docker run --rm poe2-mcp:dev --version
 ```
 
 The Dockerfile pins the builder and runtime images by digest and verifies that the selected Go builder image matches `.go-version`. When bumping Go, update `.go-version` and the builder `FROM` tag/digest together.
@@ -177,7 +176,7 @@ docker build \
   --build-arg VERSION="$(git describe --tags --always --dirty)" \
   --build-arg COMMIT="$(git rev-parse HEAD)" \
   --build-arg DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  -t template-mcp:dev .
+  -t poe2-mcp:dev .
 ```
 
 ## CI and Security
@@ -193,8 +192,8 @@ They default to immutable releases, private vulnerability reporting, signed comm
 
 ## Release Layer
 
-Release automation is enabled for the template application so this repository proves the full binary and container release lifecycle before generated projects inherit it.
-Repositories generated from the template should update the release app credentials, package names, asset patterns, container image name, and `ghd.toml` signer workflow before cutting their first release.
+Release automation is enabled so this repository can cut the full binary and container release lifecycle.
+Before the first release, configure the release app credentials (the `RELEASE_APP_ID` variable and `RELEASE_APP_PRIVATE_KEY` secret used by `release-please.yml`, and the `jmgilman-release-please` app slug in `.github/repository-settings.toml`) and confirm the package names, asset patterns, container image name, and `ghd.toml` signer workflow.
 
 The release path is:
 
@@ -203,15 +202,14 @@ The release path is:
 - Release Dry Run rehearses the GoReleaser binary path and native-runner Docker container build path on pull requests.
 - GoReleaser builds binaries, checksums, and SBOMs without publishing directly.
 - The release workflow uploads assets to the draft release and creates a GitHub-hosted attestation for `checksums.txt`.
-- The release workflow builds amd64 and arm64 container images on native GitHub-hosted runners, publishes `ghcr.io/meigma/template-mcp:vX.Y.Z` as a multi-platform manifest, attaches BuildKit provenance and SBOM metadata, and creates a GitHub-native attestation for the manifest digest.
+- The release workflow builds amd64 and arm64 container images on native GitHub-hosted runners, publishes `ghcr.io/jmgilman/poe:vX.Y.Z` as a multi-platform manifest, attaches BuildKit provenance and SBOM metadata, and creates a GitHub-native attestation for the manifest digest.
 - A human inspects the draft release before publication.
 
-The root `ghd.toml` matches the default GoReleaser output so generated projects can be installed with `ghd` once the release workflow runs.
-After cloning this template, update `provenance.signer_workflow`, package names, asset patterns, binary paths, and image names to match the new repository and binary name.
+The root `ghd.toml` matches the default GoReleaser output so the binary can be installed with `ghd` once the release workflow runs.
 
 ## Documentation
 
-Full documentation is published at <https://meigma.github.io/template-mcp/>: a getting-started tutorial, an add-a-tool how-to, a configuration reference, and the security model. The Go API reference is on [pkg.go.dev](https://pkg.go.dev/github.com/meigma/template-mcp). Preview the site locally with `moon run docs:serve`.
+Full documentation is published at <https://jmgilman.github.io/poe/>: a getting-started tutorial, an add-a-tool how-to, a configuration reference, and the security model. The Go API reference is on [pkg.go.dev](https://pkg.go.dev/github.com/jmgilman/poe). Preview the site locally with `moon run docs:serve`.
 
 ## Contributing
 

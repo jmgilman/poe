@@ -1,4 +1,4 @@
-module github.com/meigma/template-mcp/tools/proxy
+module github.com/jmgilman/poe/tools/proxy
 
 go 1.26.4
 

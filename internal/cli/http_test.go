@@ -170,13 +170,13 @@ func TestServeHTTPShutsDownOnContextCancel(t *testing.T) {
 	}
 }
 
-// TestHTTPCommandReadsAddrFromEnvironment exercises the TEMPLATE_MCP_ADDR -> addr
+// TestHTTPCommandReadsAddrFromEnvironment exercises the POE2_MCP_ADDR -> addr
 // binding (the wiring most likely to break silently after the rename step). The
 // fail-closed guard refuses the non-loopback address before any socket is bound,
 // so the refusal error mentioning that address proves the env value reached the
 // command.
 func TestHTTPCommandReadsAddrFromEnvironment(t *testing.T) {
-	t.Setenv("TEMPLATE_MCP_ADDR", "0.0.0.0:65535")
+	t.Setenv("POE2_MCP_ADDR", "0.0.0.0:65535")
 
 	root := NewRootCommand(Options{Viper: viper.New()})
 	root.SetArgs([]string{httpCommandName})
@@ -189,12 +189,12 @@ func TestHTTPCommandReadsAddrFromEnvironment(t *testing.T) {
 }
 
 // TestEnvBindingResolvesHyphenatedFlag covers the SetEnvKeyReplacer hop that the
-// addr test does not: the "auth-token" flag binds to TEMPLATE_MCP_AUTH_TOKEN
+// addr test does not: the "auth-token" flag binds to POE2_MCP_AUTH_TOKEN
 // (hyphen -> underscore). A regression dropping the replacer would break this
 // while the hyphen-free addr key kept working, so it is tested explicitly. It
 // binds flags directly rather than serving, keeping the test deterministic.
 func TestEnvBindingResolvesHyphenatedFlag(t *testing.T) {
-	t.Setenv("TEMPLATE_MCP_AUTH_TOKEN", "from-env")
+	t.Setenv("POE2_MCP_AUTH_TOKEN", "from-env")
 
 	vp := viper.New()
 	httpCmd := newHTTPCommand(Options{Viper: vp})

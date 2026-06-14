@@ -19,7 +19,7 @@ on:
 permissions: {}
 
 env:
-  IMAGE_NAME: ghcr.io/meigma/template-mcp
+  IMAGE_NAME: ghcr.io/jmgilman/poe
 
 jobs:
   resolve-release:
@@ -127,7 +127,7 @@ jobs:
           set -euo pipefail
 
           version="${RELEASE_TAG#v}"
-          binary_name="template-mcp"
+          binary_name="poe2-mcp"
           host_os="$(go env GOHOSTOS)"
           host_arch="$(go env GOHOSTARCH)"
           bin="dist/release-assets/${binary_name}_${version}_${host_os}_${host_arch}"
@@ -224,8 +224,8 @@ jobs:
           tags: |
             type=raw,value=${{ needs.resolve-release.outputs.tag }}
           labels: |
-            org.opencontainers.image.title=template-mcp
-            org.opencontainers.image.description=Meigma Go MCP server template
+            org.opencontainers.image.title=poe2-mcp
+            org.opencontainers.image.description=Path of Exile 2 MCP server
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.version=${{ needs.resolve-release.outputs.version }}
             org.opencontainers.image.revision=${{ steps.image.outputs.commit }}
@@ -240,8 +240,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           provenance: mode=max
           sbom: true
-          cache-from: type=gha,scope=template-mcp-release-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=template-mcp-release-${{ matrix.arch }}
+          cache-from: type=gha,scope=poe2-mcp-release-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=poe2-mcp-release-${{ matrix.arch }}
           build-args: |
             VERSION=${{ steps.image.outputs.version }}
             COMMIT=${{ steps.image.outputs.commit }}
@@ -415,9 +415,9 @@ jobs:
             echo
             echo '```sh'
             echo "gh release view $RELEASE_TAG --repo $GITHUB_REPOSITORY --json isDraft,assets"
-            echo "asset=\"template-mcp_${RELEASE_VERSION}_\$(go env GOOS)_\$(go env GOARCH)\""
+            echo "asset=\"poe2-mcp_${RELEASE_VERSION}_\$(go env GOOS)_\$(go env GOARCH)\""
             echo "gh attestation verify \"dist/release-assets/\${asset}\" --repo \"$GITHUB_REPOSITORY\" --signer-workflow \"$GITHUB_REPOSITORY/.github/workflows/release.yml\" --source-ref \"refs/tags/$RELEASE_TAG\" --deny-self-hosted-runners"
-            echo "ghd download \"$GITHUB_REPOSITORY/template-mcp@${RELEASE_VERSION}\" --output \"\$(mktemp -d)\""
+            echo "ghd download \"$GITHUB_REPOSITORY/poe2-mcp@${RELEASE_VERSION}\" --output \"\$(mktemp -d)\""
             echo '```'
             echo
             echo "Container verification commands:"

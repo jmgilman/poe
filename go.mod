@@ -1,4 +1,4 @@
-module github.com/meigma/template-mcp
+module github.com/jmgilman/poe
 
 go 1.26.4
 

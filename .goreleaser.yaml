@@ -1,15 +1,15 @@
 version: 2
 
-project_name: template-mcp
+project_name: poe2-mcp
 
 before:
   hooks:
     - go test ./...
 
 builds:
-  - id: template-mcp
-    main: ./cmd/template-mcp
-    binary: template-mcp
+  - id: poe2-mcp
+    main: ./cmd/poe2-mcp
+    binary: poe2-mcp
     env:
       - CGO_ENABLED=0
     goos:
@@ -28,9 +28,9 @@ builds:
     mod_timestamp: '{{ .CommitTimestamp }}'
 
 archives:
-  - id: template-mcp
+  - id: poe2-mcp
     ids:
-      - template-mcp
+      - poe2-mcp
     formats:
       - binary
     name_template: >-

@@ -9,5 +9,5 @@ import (
 func TestEnvPrefix(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(t, "TEMPLATE_MCP", EnvPrefix())
+	assert.Equal(t, "POE2_MCP", EnvPrefix())
 }

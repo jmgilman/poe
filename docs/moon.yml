@@ -7,11 +7,11 @@ tags:
   - 'uv'
 
 project:
-  title: 'template-mcp docs'
-  description: 'MkDocs documentation site for the Meigma Go MCP server template.'
-  owner: 'meigma'
+  title: 'poe2-mcp docs'
+  description: 'MkDocs documentation site for the Path of Exile 2 MCP server.'
+  owner: 'jmgilman'
   maintainers:
-    - 'meigma'
+    - 'jmgilman'
 
 toolchains:
   default: 'unstable_python'

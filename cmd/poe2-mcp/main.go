@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/meigma/template-mcp/internal/cli"
+	"github.com/jmgilman/poe/internal/cli"
 )
 
 // GoReleaser injects these values with ldflags during releases. When they are

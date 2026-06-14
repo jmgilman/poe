@@ -39,24 +39,24 @@ RUN --mount=type=cache,target=/go/pkg/mod \
       -trimpath \
       -buildvcs=false \
       -ldflags="-s -w -buildid= -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" \
-      -o /out/template-mcp \
-      ./cmd/template-mcp
+      -o /out/poe2-mcp \
+      ./cmd/poe2-mcp
 
 FROM gcr.io/distroless/static-debian12:nonroot@sha256:d093aa3e30dbadd3efe1310db061a14da60299baff8450a17fe0ccc514a16639 AS runtime
 ARG VERSION=dev
 ARG COMMIT=none
-ARG SOURCE=https://github.com/meigma/template-mcp
+ARG SOURCE=https://github.com/jmgilman/poe
 
-LABEL org.opencontainers.image.title="template-mcp" \
-      org.opencontainers.image.description="Meigma Go MCP server template" \
+LABEL org.opencontainers.image.title="poe2-mcp" \
+      org.opencontainers.image.description="Path of Exile 2 MCP server" \
       org.opencontainers.image.source="${SOURCE}" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.revision="${COMMIT}"
 
 USER 65532:65532
-COPY --from=build /out/template-mcp /usr/local/bin/template-mcp
+COPY --from=build /out/poe2-mcp /usr/local/bin/poe2-mcp
 EXPOSE 8080
-ENTRYPOINT ["/usr/local/bin/template-mcp"]
+ENTRYPOINT ["/usr/local/bin/poe2-mcp"]
 # Containers are the networked deployment: default to the Streamable HTTP
 # transport bound to all interfaces. Origin protection still applies, but a
 # non-loopback bind with no auth exposes every tool to any client that can reach

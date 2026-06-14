@@ -1,7 +1,7 @@
 # Contributing
 
 Thank you for your interest in contributing.
-This repository is a Go MCP server template, so changes should keep the generated-project path simple and predictable.
+This repository is a Path of Exile 2 MCP server, so changes should keep the server and its tooling simple and predictable.
 For private vulnerability reporting, use [SECURITY.md](SECURITY.md) instead of public channels.
 
 ## Reporting Bugs
@@ -55,7 +55,7 @@ moon run root:lint
 moon run root:build
 moon run root:test
 moon run docs:serve        # preview the docs at http://127.0.0.1:8000
-go run ./cmd/template-mcp --version
+go run ./cmd/poe2-mcp --version
 ```
 
 A few environment notes:

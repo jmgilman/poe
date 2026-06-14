@@ -9,7 +9,7 @@
   "bump-patch-for-minor-pre-major": true,
   "packages": {
     ".": {
-      "package-name": "template-mcp",
+      "package-name": "poe2-mcp",
       "changelog-path": "CHANGELOG.md"
     }
   },

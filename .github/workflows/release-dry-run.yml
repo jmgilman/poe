@@ -73,7 +73,7 @@ jobs:
           set -euo pipefail
 
           version="0.0.0-dryrun.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
-          binary_name="template-mcp"
+          binary_name="poe2-mcp"
           host_os="$(go env GOHOSTOS)"
           host_arch="$(go env GOHOSTARCH)"
           bin="dist/release-assets/${binary_name}_${version}_${host_os}_${host_arch}"
@@ -135,11 +135,11 @@ jobs:
           context: .
           push: false
           platforms: ${{ matrix.platform }}
-          outputs: type=oci,dest=/tmp/template-mcp-dry-run-${{ matrix.arch }}.oci
+          outputs: type=oci,dest=/tmp/poe2-mcp-dry-run-${{ matrix.arch }}.oci
           provenance: mode=max
           sbom: true
-          cache-from: type=gha,scope=template-mcp-release-dry-run-${{ matrix.arch }}
-          cache-to: type=gha,mode=max,scope=template-mcp-release-dry-run-${{ matrix.arch }}
+          cache-from: type=gha,scope=poe2-mcp-release-dry-run-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=poe2-mcp-release-dry-run-${{ matrix.arch }}
           build-args: |
             VERSION=${{ steps.dry-run.outputs.version }}
             COMMIT=${{ steps.dry-run.outputs.commit }}
@@ -147,7 +147,7 @@ jobs:
             SOURCE=https://github.com/${{ github.repository }}
 
       - name: Validate platform OCI archive
-        run: test -s /tmp/template-mcp-dry-run-${{ matrix.arch }}.oci
+        run: test -s /tmp/poe2-mcp-dry-run-${{ matrix.arch }}.oci
 
   container-image-dry-run:
     name: Container Image Dry Run
@@ -195,8 +195,8 @@ jobs:
           context: .
           target: test
           push: false
-          cache-from: type=gha,scope=template-mcp-release-dry-run-amd64
-          cache-to: type=gha,mode=max,scope=template-mcp-release-dry-run-amd64
+          cache-from: type=gha,scope=poe2-mcp-release-dry-run-amd64
+          cache-to: type=gha,mode=max,scope=poe2-mcp-release-dry-run-amd64
 
       - name: Build local smoke-test image
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
@@ -204,9 +204,9 @@ jobs:
           context: .
           load: true
           platforms: linux/amd64
-          tags: template-mcp:dry-run
-          cache-from: type=gha,scope=template-mcp-release-dry-run-amd64
-          cache-to: type=gha,mode=max,scope=template-mcp-release-dry-run-amd64
+          tags: poe2-mcp:dry-run
+          cache-from: type=gha,scope=poe2-mcp-release-dry-run-amd64
+          cache-to: type=gha,mode=max,scope=poe2-mcp-release-dry-run-amd64
           build-args: |
             VERSION=${{ steps.dry-run.outputs.version }}
             COMMIT=${{ steps.dry-run.outputs.commit }}
@@ -217,5 +217,5 @@ jobs:
         run: |
           set -euo pipefail
 
-          docker run --rm template-mcp:dry-run --version
-          docker run --rm template-mcp:dry-run --help
+          docker run --rm poe2-mcp:dry-run --version
+          docker run --rm poe2-mcp:dry-run --help

@@ -1,4 +1,4 @@
-// Package cli builds the template-mcp command tree.
+// Package cli builds the poe2-mcp command tree.
 //
 // The root command wires two transport subcommands onto the same
 // transport-agnostic MCP server from internal/mcpserver: stdio, for clients
@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/meigma/template-mcp/internal/templateinfo"
+	"github.com/jmgilman/poe/internal/templateinfo"
 )
 
 // BuildInfo describes linker-injected build metadata printed by --version.
@@ -45,11 +45,11 @@ type Options struct {
 	Build BuildInfo
 	// Viper is the configuration instance used by the command tree. Flags are
 	// bound to environment variables named after [templateinfo.EnvPrefix],
-	// for example TEMPLATE_MCP_ADDR.
+	// for example POE2_MCP_ADDR.
 	Viper *viper.Viper
 }
 
-// NewRootCommand creates the template-mcp Cobra command tree.
+// NewRootCommand creates the poe2-mcp Cobra command tree.
 //
 // The root command does no work on its own; it wires the two transport
 // subcommands (stdio and http) onto the same MCP server. To produce a
@@ -94,17 +94,17 @@ func NewRootCommand(options Options) *cobra.Command {
 	root.SetErr(options.Err)
 
 	// Persistent logging flags apply to every subcommand and bind to
-	// TEMPLATE_MCP_LOG_LEVEL / TEMPLATE_MCP_LOG_FORMAT via initializeConfig.
+	// POE2_MCP_LOG_LEVEL / POE2_MCP_LOG_FORMAT via initializeConfig.
 	// Logs always go to stderr; stdout stays the JSON-RPC channel.
 	root.PersistentFlags().String(
 		logLevelFlag,
 		defaultLogLevel,
-		"log level: debug, info, warn, or error (env TEMPLATE_MCP_LOG_LEVEL)",
+		"log level: debug, info, warn, or error (env POE2_MCP_LOG_LEVEL)",
 	)
 	root.PersistentFlags().String(
 		logFormatFlag,
 		defaultLogFormat,
-		"log format: text or json (env TEMPLATE_MCP_LOG_FORMAT)",
+		"log format: text or json (env POE2_MCP_LOG_FORMAT)",
 	)
 
 	root.AddCommand(newStdioCommand(options))

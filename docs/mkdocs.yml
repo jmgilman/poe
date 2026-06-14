@@ -1,8 +1,8 @@
-site_name: template-mcp
-site_description: Meigma Go MCP server template
-site_url: https://meigma.github.io/template-mcp/
-repo_name: meigma/template-mcp
-repo_url: https://github.com/meigma/template-mcp
+site_name: Path of Exile 2 MCP Server
+site_description: Path of Exile 2 MCP server
+site_url: https://jmgilman.github.io/poe/
+repo_name: jmgilman/poe
+repo_url: https://github.com/jmgilman/poe
 edit_uri: edit/master/docs/docs/
 docs_dir: docs
 site_dir: build
