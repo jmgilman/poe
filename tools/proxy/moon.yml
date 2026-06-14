@@ -1,0 +1,97 @@
+language: 'go'
+layer: 'tool'
+stack: 'backend'
+
+project:
+  title: 'mcp-devproxy'
+  description: 'MCP dev proxy that hot-reloads an in-development server behind a stable client session.'
+  owner: 'meigma'
+  maintainers:
+    - 'meigma'
+
+toolchains:
+  default: 'go'
+
+fileGroups:
+  goSources:
+    - 'cmd/**/*.go'
+    - 'internal/**/*.go'
+    - 'go.mod'
+    - 'go.sum'
+  lintConfig:
+    - '/.golangci.yml'
+    - '/.prototools'
+    - '/.moon/proto/golangci-lint.toml'
+  mockConfig:
+    - '.mockery.yaml'
+
+workspace:
+  inheritedTasks:
+    include: []
+
+# format/lint reuse the root .golangci.yml. No local-prefix override is needed:
+# goimports matches local-prefixes by string prefix, so the root's
+# 'github.com/meigma/template-mcp' already covers this nested module's path
+# ('github.com/meigma/template-mcp/tools/proxy').
+tasks:
+  format:
+    command: 'proto run golangci-lint -- fmt --config ../../.golangci.yml --diff'
+    toolchains: ['go']
+    inputs:
+      - '@group(goSources)'
+      - '@group(lintConfig)'
+    options:
+      cache: false
+      mutex: 'golangci-lint'
+
+  # format checks (--diff, used by `check`/CI); format-fix applies the changes.
+  format-fix:
+    command: 'proto run golangci-lint -- fmt --config ../../.golangci.yml'
+    toolchains: ['go']
+    inputs:
+      - '@group(goSources)'
+      - '@group(lintConfig)'
+    options:
+      cache: false
+      mutex: 'golangci-lint'
+
+  lint:
+    command: 'proto run golangci-lint -- run --config ../../.golangci.yml ./... --show-stats=false'
+    toolchains: ['go']
+    inputs:
+      - '@group(goSources)'
+      - '@group(lintConfig)'
+    options:
+      cache: false
+      mutex: 'golangci-lint'
+
+  build:
+    command: 'go build -o bin/mcp-devproxy ./cmd/mcp-devproxy'
+    toolchains: ['go']
+    inputs:
+      - '@group(goSources)'
+    outputs:
+      - 'bin/mcp-devproxy'
+
+  test:
+    command: 'go test -race -coverprofile=coverage.out ./...'
+    toolchains: ['go']
+    inputs:
+      - '@group(goSources)'
+      - '@group(mockConfig)'
+    options:
+      cache: false
+
+  check:
+    deps:
+      - 'proxy:format'
+      - 'proxy:lint'
+      - 'proxy:build'
+      - 'proxy:test'
+    inputs:
+      - '@group(goSources)'
+      - '@group(lintConfig)'
+      - '@group(mockConfig)'
+    options:
+      cache: false
+      runInCI: true
