@@ -50,3 +50,17 @@ Gotchas learned:
 Next: PR #1 review/merge. Then real work — choose transport, build PoE API auth +
 marketplace/pricing tools. Release needs `RELEASE_APP_ID`/`RELEASE_APP_PRIVATE_KEY`
 + a real reviewer app before first release.
+
+## 2026-06-14 17:05 — Release app credentials pushed to GitHub
+Release-please GitHub App credentials live in **1Password, `Homelab` vault, item
+`meigma-release-please`** (SECURE_NOTE): `app_id` field = `3342783`, `client_id`
+field, and a `key.pem` file attachment (RSA private key). Pushed to repo
+`jmgilman/poe` via `op read … | gh …` (stdin-piped, never echoed):
+- repo **variable** `RELEASE_APP_ID` = 3342783 (workflow reads `vars.RELEASE_APP_ID`)
+- repo **secret** `RELEASE_APP_PRIVATE_KEY` ← key.pem (`secrets.RELEASE_APP_PRIVATE_KEY`)
+
+Still open: `.github/repository-settings.toml` reviewer bypass slug is the
+placeholder `jmgilman-release-please`. The 1Password item name hints the real
+GitHub App slug may be `meigma-release-please` — confirm and fix before relying
+on the settings-sync bypass. (`op whoami` reports "not signed in" yet item
+reads work — desktop/service-account integration; reads succeed regardless.)
