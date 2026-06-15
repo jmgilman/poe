@@ -64,3 +64,32 @@ placeholder `jmgilman-release-please`. The 1Password item name hints the real
 GitHub App slug may be `meigma-release-please` — confirm and fix before relying
 on the settings-sync bypass. (`op whoami` reports "not signed in" yet item
 reads work — desktop/service-account integration; reads succeed regardless.)
+
+## 2026-06-14 17:20 — Ran configure_github_repo.py against jmgilman/poe
+Confirmed real GitHub App slug = `meigma-release-please` (id 3342783) via
+`gh api /apps/meigma-release-please`; placeholder `jmgilman-release-please` 404s.
+Fixed the PR-branch manifest: slug → `meigma-release-please`, `is_template` →
+false (poe is a real repo, user-confirmed), tidied a "template" comment. Committed
+to PR #1 (`fix(settings): …`, 2717213).
+
+Applied via `uv run .github/scripts/configure_github_repo.py apply --repo jmgilman/poe`
+(token from `gh auth token`; repo is PUBLIC so rulesets are allowed):
+- ✅ general settings (incl is_template=false, squash-only), security toggles
+  (vuln alerts, immutable releases, PVR, auto security fixes), Pages site.
+- ✅ branch ruleset "Default branch" (id 17669340): PR required, signed commits,
+  linear history, deletion + force-push protection, required checks
+  (ci, Binary Release Dry Run, Container Image Dry Run).
+- ⏳ Pages `https_enforced`: explicit PUT 404s "certificate does not exist yet"
+  (cert provisioning), but `GET /pages` already reports https_enforced=true
+  (github.io default) — plan now shows no pages delta. Effectively done.
+- ❌ tag ruleset "Default tags" — BLOCKED. 422: "Actor meigma-release-please
+  integration must be part of the ruleset source or owner organization". The app
+  is **not installed** on jmgilman/poe (pushing its secrets ≠ installing it).
+  Branch ruleset succeeded because its only bypass is repository_admin_role.
+
+NEXT (user action): install the `meigma-release-please` GitHub App on
+jmgilman/poe (install URL `github.com/apps/meigma-release-please/installations/new`),
+then re-run `apply` from the PR worktree to create the tag ruleset. Gotcha: the
+script applies pages BEFORE the tag ruleset and aborts on first error, so if the
+cert ever regresses, enforce pages https first. App-install state can't be
+queried with the plain gh token (needs app JWT / app-authorized token).
