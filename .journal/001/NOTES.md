@@ -109,3 +109,14 @@ Wrong app used above — the correct one is **`jmgilman-release-please`** (1Pass
 Lesson: for private GitHub Apps, bypass actors must use `type="integration"` +
 App ID, not `type="app"` + slug (public-only). And the app must be installed on
 the repo or the ruleset POST 422s ("must be part of ruleset source or owner org").
+
+## 2026-06-14 17:33 — Close
+Session 001 closed. PR #1 squash-merged to `master` (merge commit `dffad47`);
+remote + local `chore/rebrand-poe2-mcp` branch and worktree removed; `master`
+fast-forwarded in the main checkout (upstream tracking set). Repo `jmgilman/poe`
+is rebranded to `poe2-mcp` and fully configured (settings + branch/tag rulesets);
+release-app credentials (`jmgilman-release-please`, App ID 4055060) are in place.
+SUMMARY.md written; INDEX.md row → complete; TECH_NOTES.md updated with the
+release/repo-config infra context. Handoff: repo is clean on `master`, no open
+PRs. Next session = real PoE functionality (transport choice + API auth +
+marketplace/pricing tools).
