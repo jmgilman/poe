@@ -93,3 +93,19 @@ then re-run `apply` from the PR worktree to create the tag ruleset. Gotcha: the
 script applies pages BEFORE the tag ruleset and aborts on first error, so if the
 cert ever regresses, enforce pages https first. App-install state can't be
 queried with the plain gh token (needs app JWT / app-authorized token).
+
+## 2026-06-14 17:28 — Corrected to jmgilman-release-please app; config complete
+Wrong app used above — the correct one is **`jmgilman-release-please`** (1Password
+`Homelab` vault, same item shape: `app_id`, `client_id`, `key.pem`). App ID =
+**4055060** (meigma's 3342783 was wrong). Overwrote repo var `RELEASE_APP_ID` →
+4055060 and secret `RELEASE_APP_PRIVATE_KEY` ← its key.pem.
+- This app is **private**: `GET /apps/jmgilman-release-please` 404s, so the
+  configure script's slug→id resolver can't see it. Manifest tag bypass switched
+  from `{type="app", slug=...}` to `{type="integration", actor_id=4055060}`
+  (actor_id = App ID). Committed to PR #1 (33847d0).
+- Re-ran apply: tag ruleset **created** (id 17669490; bypass = admin role +
+  Integration 4055060) — so this app IS installed on jmgilman/poe. Final plan:
+  "No supported changes are required." Repo fully configured.
+Lesson: for private GitHub Apps, bypass actors must use `type="integration"` +
+App ID, not `type="app"` + slug (public-only). And the app must be installed on
+the repo or the ruleset POST 422s ("must be part of ruleset source or owner org").
