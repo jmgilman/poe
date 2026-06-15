@@ -1,18 +1,18 @@
 ---
 title: Security
-description: The template's secure-by-default choices and how to harden a deployment.
+description: The server's secure-by-default choices and how to harden a deployment.
 ---
 
 # Security
 
-The template bakes in the practices an MCP server should have on day one.
+This server bakes in the practices an MCP server should have on day one.
 This page explains the reasoning so you can preserve the guarantees as you build.
 
 ## stdout is reserved for JSON-RPC
 
 Over the STDIO transport, stdout carries protocol messages only. A stray
 `fmt.Println` or a logger pointed at `os.Stdout` silently corrupts the stream —
-the most common way a stdio server breaks. The template logs to stderr only;
+the most common way a stdio server breaks. The server logs to stderr only;
 keep all logging and diagnostics there. The `--log-format=json` option still
 writes to stderr.
 
@@ -66,5 +66,5 @@ environment of the process that launched them.
 - Repository settings default to signed commits, squash-only merges, protected
   tags, immutable releases, and private vulnerability reporting.
 
-See [SECURITY.md](https://github.com/meigma/template-mcp/blob/master/SECURITY.md)
+See [SECURITY.md](https://github.com/jmgilman/poe/blob/master/SECURITY.md)
 for the vulnerability reporting policy.

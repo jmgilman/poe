@@ -12,12 +12,12 @@ session start, so every code change normally requires killing the
 conversation, rebuilding, and reconnecting.
 
 The proxy is dev tooling: it lives in a nested Go module
-(`github.com/meigma/template-mcp/tools/proxy`) so its dependencies never leak
-into the template's `go.mod`, and it is deliberately excluded from releases.
+(`github.com/jmgilman/poe/tools/proxy`) so its dependencies never leak
+into the repository's `go.mod`, and it is deliberately excluded from releases.
 
 ## Quick start
 
-Inside this template there is nothing to set up. The repository's checked-in
+Inside this repository there is nothing to set up. The repository's checked-in
 `.mcp.json` points Claude Code at a wrapper that builds the proxy through
 Moon's cached `proxy:build` task and then execs it:
 
@@ -48,21 +48,21 @@ load-bearing:
   missing or stale.
 
 To run the proxy with explicit flags — for another repository layout, or
-after renaming the template's binary — the child command after `--` is
+after renaming the server binary — the child command after `--` is
 re-run for every reload cycle with `{{artifact}}` replaced by that cycle's
 freshly built binary. The full CLI shape:
 
 ```sh
 mcp-devproxy \
-  --build "go build -o {{artifact}} ./cmd/template-mcp" \
+  --build "go build -o {{artifact}} ./cmd/poe2-mcp" \
   --watch cmd --watch internal \
   [--debounce 300ms] [--quiesce 5s] [--terminate 1s] \
   -- {{artifact}} stdio
 ```
 
-**Zero config inside this template:** every flag has a working default for
+**Zero config inside this repository:** every flag has a working default for
 this repository's layout, so a bare `mcp-devproxy` (empty `args`) builds and
-serves `./cmd/template-mcp` over stdio. Each defaulted value is announced on
+serves `./cmd/poe2-mcp` over stdio. Each defaulted value is announced on
 stderr. The defaults live in one isolated file
 (`internal/cli/defaults.go`) so extracting the proxy to a standalone
 repository stays clean.
@@ -75,7 +75,7 @@ defaults.
 
 | Flag | Environment | Default | Meaning |
 |---|---|---|---|
-| `--build` | `MCP_DEVPROXY_BUILD` | `go build -o {{artifact}} ./cmd/template-mcp` * | Build command template. Split on whitespace — no shell, so quoting and arguments containing spaces are not supported. Must reference `{{artifact}}`. |
+| `--build` | `MCP_DEVPROXY_BUILD` | `go build -o {{artifact}} ./cmd/poe2-mcp` * | Build command template. Split on whitespace — no shell, so quoting and arguments containing spaces are not supported. Must reference `{{artifact}}`. |
 | `--watch` | `MCP_DEVPROXY_WATCH` | `cmd`, `internal` * | Directory to watch recursively for source changes. Repeatable; the environment form is a whitespace-separated list. |
 | `--dir` | `MCP_DEVPROXY_DIR` | current directory | Working directory for the build command. |
 | `--debounce` | `MCP_DEVPROXY_DEBOUNCE` | `300ms` | How long source-change bursts are coalesced before a rebuild starts. |
@@ -83,7 +83,7 @@ defaults.
 | `--terminate` | `MCP_DEVPROXY_TERMINATE` | `1s` | How long each child shutdown escalation step (stdin close, SIGTERM, SIGKILL) waits. |
 | `--verbose` | `MCP_DEVPROXY_VERBOSE` | `false` | Debug logging on stderr, including build output. |
 
-\* Template-layout zero-config default, applied only when the flag is unset.
+\* Repository-layout zero-config default, applied only when the flag is unset.
 
 The child command is positional argv after `--` (default:
 `{{artifact}} stdio`) and must reference `{{artifact}}` — the rebuilt

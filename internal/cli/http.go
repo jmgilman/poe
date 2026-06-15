@@ -15,7 +15,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/meigma/template-mcp/internal/mcpserver"
+	"github.com/jmgilman/poe/internal/mcpserver"
 )
 
 const (
@@ -89,13 +89,13 @@ func newHTTPCommand(options Options) *cobra.Command {
 
 	// --addr defaults to loopback, not 0.0.0.0: binding to all interfaces
 	// exposes the server to the local network and is a deliberate opt-in.
-	cmd.Flags().String(addrFlag, "localhost:8080", "address to listen on (env TEMPLATE_MCP_ADDR)")
+	cmd.Flags().String(addrFlag, "localhost:8080", "address to listen on (env POE2_MCP_ADDR)")
 	// --auth-token is empty by default, which disables auth. See requireBearerToken
 	// for the heavy caveats: this is a DEMO-ONLY seam, not production auth.
 	cmd.Flags().String(
 		authTokenFlag,
 		"",
-		"DEMO-ONLY shared bearer token; empty disables auth (env TEMPLATE_MCP_AUTH_TOKEN)",
+		"DEMO-ONLY shared bearer token; empty disables auth (env POE2_MCP_AUTH_TOKEN)",
 	)
 	// --insecure is the explicit opt-in to bind a non-loopback address without
 	// authentication. Without it, runHTTP refuses such a configuration so a
@@ -103,7 +103,7 @@ func newHTTPCommand(options Options) *cobra.Command {
 	cmd.Flags().Bool(
 		insecureFlag,
 		false,
-		"allow binding a non-loopback address without authentication (UNSAFE; env TEMPLATE_MCP_INSECURE)",
+		"allow binding a non-loopback address without authentication (UNSAFE; env POE2_MCP_INSECURE)",
 	)
 
 	return cmd
@@ -217,7 +217,7 @@ func checkBindSecurity(addr, authToken string, insecure bool) error {
 
 	return fmt.Errorf(
 		"refusing to bind non-loopback address %q without authentication: "+
-			"set --auth-token (env TEMPLATE_MCP_AUTH_TOKEN) to require a bearer token, "+
+			"set --auth-token (env POE2_MCP_AUTH_TOKEN) to require a bearer token, "+
 			"or pass --insecure to expose all tools unauthenticated (UNSAFE)",
 		addr,
 	)

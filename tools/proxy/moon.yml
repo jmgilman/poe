@@ -5,9 +5,9 @@ stack: 'backend'
 project:
   title: 'mcp-devproxy'
   description: 'MCP dev proxy that hot-reloads an in-development server behind a stable client session.'
-  owner: 'meigma'
+  owner: 'jmgilman'
   maintainers:
-    - 'meigma'
+    - 'jmgilman'
 
 toolchains:
   default: 'go'
@@ -31,8 +31,8 @@ workspace:
 
 # format/lint reuse the root .golangci.yml. No local-prefix override is needed:
 # goimports matches local-prefixes by string prefix, so the root's
-# 'github.com/meigma/template-mcp' already covers this nested module's path
-# ('github.com/meigma/template-mcp/tools/proxy').
+# 'github.com/jmgilman/poe' already covers this nested module's path
+# ('github.com/jmgilman/poe/tools/proxy').
 tasks:
   format:
     command: 'proto run golangci-lint -- fmt --config ../../.golangci.yml --diff'

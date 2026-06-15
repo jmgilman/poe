@@ -12,7 +12,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/meigma/template-mcp/internal/mcpserver"
+	"github.com/jmgilman/poe/internal/mcpserver"
 )
 
 // stdioCommandName is the name of the stdio subcommand, also used by its tests.

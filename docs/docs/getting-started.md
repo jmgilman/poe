@@ -1,6 +1,6 @@
 ---
 title: Getting started
-description: Clone the template and run the MCP server over both transports.
+description: Build and run the MCP server over both transports.
 ---
 
 # Getting started
@@ -33,7 +33,7 @@ the pinned versions when you run the docs tasks.
 The STDIO transport is what a local MCP client launches as a subprocess:
 
 ```sh
-go run ./cmd/template-mcp stdio
+go run ./cmd/poe2-mcp stdio
 ```
 
 The process speaks newline-delimited JSON-RPC over stdin/stdout and blocks until
@@ -47,7 +47,7 @@ The HTTP transport suits networked or containerized deployments. It binds
 loopback by default:
 
 ```sh
-go run ./cmd/template-mcp http --addr localhost:8080
+go run ./cmd/poe2-mcp http --addr localhost:8080
 ```
 
 You will see a `listening` log line on stderr. Press `Ctrl-C` for a graceful

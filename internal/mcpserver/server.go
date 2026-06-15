@@ -13,7 +13,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/meigma/template-mcp/internal/templateinfo"
+	"github.com/jmgilman/poe/internal/templateinfo"
 )
 
 // Dependencies holds the shared collaborators a real server's tools need — for

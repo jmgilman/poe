@@ -3,11 +3,11 @@ layer: 'application'
 stack: 'backend'
 
 project:
-  title: 'template-mcp'
-  description: 'Meigma Go MCP server template.'
-  owner: 'meigma'
+  title: 'poe2-mcp'
+  description: 'Path of Exile 2 MCP server.'
+  owner: 'jmgilman'
   maintainers:
-    - 'meigma'
+    - 'jmgilman'
 
 toolchains:
   default: 'go'
@@ -66,12 +66,12 @@ tasks:
       mutex: 'golangci-lint'
 
   build:
-    command: 'go build -o bin/template-mcp ./cmd/template-mcp'
+    command: 'go build -o bin/poe2-mcp ./cmd/poe2-mcp'
     toolchains: ['go']
     inputs:
       - '@group(goSources)'
     outputs:
-      - 'bin/template-mcp'
+      - 'bin/poe2-mcp'
 
   test:
     command: 'go test -race -coverprofile=coverage.out ./...'

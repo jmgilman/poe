@@ -20,7 +20,7 @@ formatter-options:
     comments: true
     format-only: true
     fragment: false
-    local-prefix: github.com/meigma/template-mcp
+    local-prefix: github.com/jmgilman/poe
     tab-indent: true
     tab-width: 8
 generate: true
@@ -35,6 +35,6 @@ template-schema: '{{.Template}}.schema.json'
 packages:
   # The reloader hexagon's ports: Watcher, Builder, Upstream, ChildSession,
   # Frontend (plus any future boundary interfaces in the package).
-  github.com/meigma/template-mcp/tools/proxy/internal/reloader:
+  github.com/jmgilman/poe/tools/proxy/internal/reloader:
     config:
       all: true

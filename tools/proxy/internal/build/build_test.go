@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/meigma/template-mcp/tools/proxy/internal/build"
-	"github.com/meigma/template-mcp/tools/proxy/internal/reloader"
+	"github.com/jmgilman/poe/tools/proxy/internal/build"
+	"github.com/jmgilman/poe/tools/proxy/internal/reloader"
 )
 
 // promptReturnBound is the ceiling on how long a cancelled Build may take to

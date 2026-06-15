@@ -1,7 +1,7 @@
 [project]
-name = "template-mcp-docs"
+name = "poe2-mcp-docs"
 version = "0.0.0"
-description = "MkDocs documentation site for the Meigma Go MCP server template."
+description = "MkDocs documentation site for the Path of Exile 2 MCP server."
 requires-python = ">=3.14"
 dependencies = [
     "mkdocs-material>=9.7.0",

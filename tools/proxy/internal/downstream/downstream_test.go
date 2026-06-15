@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/meigma/template-mcp/tools/proxy/internal/reloader"
+	"github.com/jmgilman/poe/tools/proxy/internal/reloader"
 )
 
 // waitTimeout bounds every asynchronous wait in this suite.
