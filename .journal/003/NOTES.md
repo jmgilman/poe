@@ -13,3 +13,8 @@ Plan: create an isolated implementation branch, draft the document from the veri
 Created Worktrunk branch/worktree `feat/market-design-doc` at `/Users/josh/code/poe/.wt/feat-market-design-doc`.
 Added `docs/drafts/market_design.md` as a draft design note covering Exiled Exchange 2's trade-query/listing-summarizer model, `trade2` versus official API boundaries, local browser-profile authentication, query/fetch routing, rate-limit and complexity handling, result semantics, cookie/log safety, and a narrow MCP tool surface.
 Validation: `git diff --check` passed, and `moon run docs:build --summary minimal` passed with only the upstream Material/MkDocs 2.0 warning. Implementation commit: `6d578fd` (`docs: draft local market design`).
+
+## 2026-06-14 19:13 — Browser-profile addendum
+Added an addendum that argues for `Go MCP server + chromedp/Rod + dedicated profile dir + visible login command + narrow typed trade tools` as the first local implementation path instead of copying Electron.
+The addendum preserves the critical distinction that EE2's useful pattern is a persistent browser cookie jar plus typed market requests, not Electron itself. It also records the dedicated-profile boundary, visible login flow, explicit auth status probe, session clearing command, and the request-routing tradeoff between browser-context calls and a scoped HTTP client.
+Validation: `git diff --check` passed. Implementation commit: `23187a7` (`docs: add browser profile addendum`).
