@@ -8,3 +8,8 @@ started: 2026-06-14
 Goal for the session: capture the Exiled Exchange 2 market/pricing process in `docs/drafts/market_design.md`, focusing on the hard-to-preserve design details for making a similar local browser-session-backed flow work through poe2-mcp.
 Current state of the world: the repo is still mostly scaffolded (`random_int` remains the only real tool), journal notes already record that official PoE2 item-level market pricing has no sanctioned API path, and a temp clone of Exiled Exchange 2 was inspected at `/tmp/exiled-exchange-2.hymD2u` commit `006aa1cef60d25d6a24b9aeaaff6f34febc9d076`.
 Plan: create an isolated implementation branch, draft the document from the verified EE2 flow, and keep the document focused on local-session mechanics, security boundaries, rate-limit behavior, and MCP-specific design implications.
+
+## 2026-06-14 19:04 — Draft committed
+Created Worktrunk branch/worktree `feat/market-design-doc` at `/Users/josh/code/poe/.wt/feat-market-design-doc`.
+Added `docs/drafts/market_design.md` as a draft design note covering Exiled Exchange 2's trade-query/listing-summarizer model, `trade2` versus official API boundaries, local browser-profile authentication, query/fetch routing, rate-limit and complexity handling, result semantics, cookie/log safety, and a narrow MCP tool surface.
+Validation: `git diff --check` passed, and `moon run docs:build --summary minimal` passed with only the upstream Material/MkDocs 2.0 warning. Implementation commit: `6d578fd` (`docs: draft local market design`).
