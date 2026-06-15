@@ -95,7 +95,10 @@ block_force_pushes = true
 bypass = [
   { type = "repository_admin_role", mode = "always" },
   # Release Please needs tag-creation bypass because tags are protected here.
-  { type = "app", slug = "meigma-release-please", mode = "always" },
+  # jmgilman-release-please is a private GitHub App, whose slug the public
+  # /apps/{slug} endpoint can't resolve, so reference it by App ID (4055060)
+  # via an integration actor instead of a slug.
+  { type = "integration", actor_id = 4055060, mode = "always" },
 ]
 
 [rulesets.tags_default.status_checks]

@@ -193,7 +193,7 @@ They default to immutable releases, private vulnerability reporting, signed comm
 ## Release Layer
 
 Release automation is enabled so this repository can cut the full binary and container release lifecycle.
-Before the first release, configure the release app credentials (the `RELEASE_APP_ID` variable and `RELEASE_APP_PRIVATE_KEY` secret used by `release-please.yml`, and the `jmgilman-release-please` app slug in `.github/repository-settings.toml`) and confirm the package names, asset patterns, container image name, and `ghd.toml` signer workflow.
+Before the first release, configure the release app credentials (the `RELEASE_APP_ID` variable and `RELEASE_APP_PRIVATE_KEY` secret used by `release-please.yml`, and the `jmgilman-release-please` app bypass — referenced by App ID — in `.github/repository-settings.toml`) and confirm the package names, asset patterns, container image name, and `ghd.toml` signer workflow.
 
 The release path is:
 
