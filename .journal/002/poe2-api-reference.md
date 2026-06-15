@@ -213,7 +213,40 @@ documented precedent of a 2020 ban wave against a different overlay).
 - Realistic options: (a) build on the sanctioned Currency Exchange API; (b) for
   item prices, act only within a single user's authenticated session + request
   budget, mirroring the overlay model; and/or (c) consume an existing aggregator
-  rather than scraping `trade2` ourselves.
+  (e.g. **poe2scout**) rather than scraping `trade2` ourselves — see below.
+
+### Consumable aggregators (the "don't scrape `trade2` ourselves" option)
+
+To get PoE2 item prices without scraping `trade2` (and without owning that ToS
+exposure), the practical move is to consume an aggregator that already does it.
+The decisive axis is **permission to consume**, not just whether an API exists.
+Surveyed June 2026:
+
+| Source | API | PoE2? | Data | Auth | Permission to consume | Verdict |
+|--------|-----|-------|------|------|----------------------|---------|
+| **poe2scout.com** (`api.poe2scout.com`) | **Documented** (OpenAPI/Swagger) | ✅ confirmed live | Currency **+ item/unique prices** + history | None | **MIT-licensed**, public API offered; only a "set a contact User-Agent" etiquette ask | ✅ **Top pick** |
+| **poe.ninja** (`poe.ninja/poe2/api/…`) | Undocumented (works server-side) | ✅ | Currency + uniques/items | None | ⚠️ **ToS = "personal, non-commercial transitory viewing only"**; forbids copying / commercial use / mirroring | ⚠️ Permission risk |
+| **poeprices.info** | Undocumented | ❌ **PoE1 only** | ML rare-item *prediction* | None | Tolerated; attribute via `s=` | ❌ No PoE2 |
+| **poe.watch** (`api.poe.watch`) | Documented | ❌ PoE1 only | — | — | — | ❌ Eliminated |
+| EE2 backend (`api.exiledexchange2.dev`) | Client-oriented | ✅ | Aggregates | None | For the EE2 client; appears to consume poe2scout itself | ➖ Not a clean source |
+
+**Recommendation: `poe2scout.com`.** It is the only PoE2 aggregator pairing a
+documented, auth-less API (currency *and* item-level prices, verified on the live
+current league) with a **permissive MIT license** — so consuming it offloads both
+the `trade2` scraping *and* its ToS exposure onto a project that has opted into
+being consumed. Caveats: it derives from the same GGG upstream (inherits GGG's
+freshness/limits), it's a single community project (bus-factor / uptime risk —
+cache aggressively, degrade gracefully), and you should send an identifying
+`User-Agent` with contact info.
+
+**poe.ninja is the fallback** — technically the richest, actively-maintained
+dataset — but its ToS restricts use to personal, non-commercial viewing and
+forbids copying / commercial use / mirroring. There's no API-specific clause, but
+don't read that as permission. For a public or commercial MCP server, **get
+explicit sign-off in the poe.ninja Discord first**; the endpoints are undocumented
+and have already changed (read `…/poe2/api/data/index-state` at runtime; observed
+~12 req / 5 min, so cache hard). Its only explicit open-data grant (CC-BY-SA
+dumps) is PoE1-only / historical.
 
 ---
 
@@ -385,6 +418,13 @@ Limits are **per-endpoint and dynamic**, communicated via response headers.
 - Exiled Exchange 2: <https://github.com/Kvan7/Exiled-Exchange-2> (fork of <https://github.com/SnosMe/awakened-poe-trade>) — `trade2` paths, 10-ID fetch batches, rate-limit buckets, session proxy
 - Awakened PoE Trade FAQ: <https://snosme.github.io/awakened-poe-trade/faq> (clipboard mechanism + tolerance norms)
 - PoB-PoE2 trade system: <https://deepwiki.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/5.1-trade-system>
+
+**Consumable aggregators (follow-up round):**
+- poe2scout: <https://api.poe2scout.com/swagger> · <https://api.poe2scout.com/openapi.json> · <https://github.com/poe2scout/poe2scout> (MIT; live PoE2 realm/leagues verified)
+- poe.ninja PoE2 JSON API (undocumented): `https://poe.ninja/poe2/api/economy/...`, `…/poe2/api/data/index-state` · ToS <https://poe.ninja/terms> · PoE1 CC-BY-SA dumps <https://poe.ninja/poe1/data>
+- poeprices.info (PoE1-only prediction): <https://www.pathofexile.com/forum/view-thread/1216141> (SlugPranker)
+- poe.watch (PoE1-only): <https://api.poe.watch/leagues>
+- Community resource list: <https://github.com/5k-mirrors/awesome-poe-2>
 
 **Secondary / community (corroborating behavior, treat as stale for PoE2):**
 - <https://github.com/moepmoep12/poe-api-ts> (archived 2023; OAuth/header conventions)

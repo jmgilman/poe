@@ -102,3 +102,30 @@ bulk pricing has no sanctioned server-side path** — the overlays only get away
 with it via per-keypress, single-user-session queries. Updated TECH_NOTES and the
 reference doc (added §4, renumbered, refreshed open questions + sources).
 
+## 2026-06-14 18:23 — Follow-up: consumable aggregators (avoid scraping trade2)
+Developer asked which aggregator we could consume instead of scraping trade2. Ran
+3 parallel agents (poe.ninja API; PoE2-specific aggregators; prediction/overlay
+backends). The decisive axis turned out to be **permission to consume**, not
+availability. Added a comparison table + recommendation to doc §4
+("Consumable aggregators"). Bottom line:
+- **poe2scout.com (`api.poe2scout.com`) = top pick.** Documented OpenAPI/Swagger,
+  no auth, **currency + item/unique prices + history**, PoE2 confirmed live (Runes
+  of Aldur), **MIT-licensed** (opted into being consumed; only a contact
+  User-Agent ask). It consumes official GGG endpoints itself → offloads both the
+  scraping and the ToS exposure to them. Caveats: same GGG upstream; single
+  community project (bus-factor) → cache hard.
+- **poe.ninja = fallback w/ permission risk.** Open auth-less PoE2 JSON API
+  (`poe.ninja/poe2/api/economy/...`, read `index-state` for leagues), richest
+  dataset, actively maintained — BUT ToS = "personal, non-commercial transitory
+  viewing only," forbids copying/commercial/mirroring. Get explicit Discord
+  sign-off before a public/commercial build. Endpoints undocumented & already
+  changed; observed ~12 req/5min. CC-BY-SA dumps exist but PoE1-only.
+- **poeprices.info = PoE1 rare-item prediction ONLY** (model uses "links"/linked
+  sockets, which don't exist in PoE2) → not usable for PoE2.
+- **poe.watch = PoE1-only**, eliminated. EE2 backend = client-oriented, itself
+  appears to consume poe2scout → not a clean independent source.
+
+Net product steer: currency → official Currency Exchange API; PoE2 item prices →
+consume **poe2scout** (clean license) rather than scraping trade2 or taking on
+poe.ninja's ToS risk.
+
