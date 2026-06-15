@@ -70,8 +70,35 @@ Key takeaways captured in the doc:
   limits are dynamic via `X-Rate-Limit-*` + `Retry-After` headers — **do NOT
   hard-code numbers** (three circulating numeric limits were refuted 0-3).
 
-Open threads for the product (also listed in the doc §7): what the OAuth
+Open threads for the product (also listed in the doc §8): what the OAuth
 application email must contain + approval bar; exactly which fields/scopes return
 PoE2 data; whether any official PoE2 trade/market path exists or is forthcoming;
 concrete rate-limit values for our hot endpoints.
+
+## 2026-06-14 18:01 — Follow-up: where third parties get PoE2 market data
+Developer asked how poe.ninja / Exiled Exchange 2 get PoE2 market data given no
+public-stash river. Ran 3 parallel research agents (poe.ninja; Exiled Exchange 2;
+the trade2 site API). All source-verified. Findings **corrected an overstatement**
+in the original doc: there IS one official PoE2 economy feed (the Currency
+Exchange API) — the earlier "no official PoE2 trade/economy feed" was too broad.
+
+Answer (now captured as **doc §4 "Where PoE2 market data actually comes from"**):
+- **Currency economy → official Currency Exchange API** (`/currency-exchange`,
+  scope `service:cxapi`, realm `poe2`, hourly aggregates). Sanctioned. poe.ninja's
+  PoE2 economy section uses it. Currency only — no item listings.
+- **Item-level prices → undocumented `trade2` site API** (`POST /api/trade2/
+  search/{league}` → `GET /api/trade2/fetch/{ids}`, 10 IDs/batch). **Against GGG
+  ToS §7i** (docs literally cite it). Rides user's own POESESSID; Cloudflare is
+  the real gatekeeper. poe.ninja uses it for item prices ("no River API for PoE2
+  yet, so prices are estimated from the official trade API"). Exiled Exchange 2
+  (fork of Awakened PoE Trade) does clipboard-parse + one trade2 query per
+  keypress through an Electron proxy on the user's session.
+- **Derived feeds:** poeprices.info (ML rare-item prediction), EE2's own
+  `api.exiledexchange2.dev` aggregates.
+
+Product implication (also in doc §4): a **headless MCP server can cleanly serve
+currency data** (Currency Exchange API + confidential client), but **item-level
+bulk pricing has no sanctioned server-side path** — the overlays only get away
+with it via per-keypress, single-user-session queries. Updated TECH_NOTES and the
+reference doc (added §4, renumbered, refreshed open questions + sources).
 

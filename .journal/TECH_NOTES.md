@@ -14,7 +14,17 @@
   (user) scopes, Client Credentials for `service:*` (confidential clients only).
 - **PoE2 returns limited data today** (profile, characters, item-filter, leagues,
   currency-exchange). Public stashes / account+guild stashes / PvP / account
-  leagues are **PoE1-only** → **no official PoE2 trade/public-stash feed exists.**
+  leagues are **PoE1-only** → **no official PoE2 public-stash river / bulk
+  item-listing feed.**
+- **PoE2 market data sourcing:** the **Currency Exchange API** (`service:cxapi`,
+  realm `poe2`, hourly aggregates) is the *only* official PoE2 economy feed
+  (currency only) — this is what poe.ninja uses for PoE2 currency. **Item-level
+  prices have NO sanctioned path:** poe.ninja and overlays (Exiled Exchange 2 =
+  Awakened PoE Trade fork) scrape the **undocumented `trade2` site API**
+  (`/api/trade2/search` + `/fetch`), which is **against GGG ToS §7i** and rides
+  the user's own session (POESESSID) past Cloudflare. Implication: a headless MCP
+  server can safely serve currency data but cannot legitimately serve bulk PoE2
+  item prices.
 - Access is **manually approved** via `oauth@grindinggear.com`; **LLM-generated
   requests are auto-rejected** (tension for an MCP product — pitch must be
   human-written and concrete). Rate limits are dynamic via `X-Rate-Limit-*`

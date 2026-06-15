@@ -27,8 +27,12 @@
   [Onboarding](#registration--onboarding)).
 - **PoE2 returns limited game data today.** Several useful endpoints
   (public stashes/trade stream, account/guild stashes, PvP, account leagues)
-  are **PoE1-only**. There is currently **no official PoE2 trade / public-stash
-  data feed.**
+  are **PoE1-only**. There is **no official PoE2 public-stash "river" / bulk
+  item-listing feed** — the one thing every trade tool wants. The *only*
+  official PoE2 economy feed is the **Currency Exchange API** (`service:cxapi`,
+  aggregate currency data); live item prices come only from the **undocumented
+  `trade2` site API**, which is against GGG's ToS §7i. See
+  [§4 — where PoE2 market data comes from](#4-where-poe2-market-data-actually-comes-from).
 
 ---
 
@@ -102,8 +106,11 @@ properties.
 
 ### What is NOT covered / gaps to plan around
 
-- **No official PoE2 trade or public-stash data feed.** The Public Stash Tab
-  stream (the basis of every third-party PoE1 trade tool) is **PoE1-only**.
+- **No official PoE2 public-stash "river" / bulk item-listing feed.** The Public
+  Stash Tab stream (the basis of every third-party PoE1 trade tool) is
+  **PoE1-only**. The one official PoE2 economy feed is the narrow **Currency
+  Exchange API** (currency aggregates only — see
+  [§4](#4-where-poe2-market-data-actually-comes-from)).
 - **No account/guild stash, PvP, or account-league data for PoE2.**
 - **No published OpenAPI/Swagger, no GraphQL.**
 - The **official developer API (`api.pathofexile.com`) is distinct from the
@@ -128,7 +135,89 @@ For reference, since it's what an MCP server would *want* for trade data:
 
 ---
 
-## 4. Authentication — OAuth 2.1 (not OIDC)
+## 4. Where PoE2 market data actually comes from
+
+The biggest practical gap above (no PoE2 public-stash river) is why PoE2 economy
+sites and overlays don't all work the same way. There are **three** data paths,
+only one of which is officially sanctioned.
+
+### A. Currency economy → official Currency Exchange API ✅ sanctioned
+
+- `GET /currency-exchange[/<realm>][/<id>]`, scope **`service:cxapi`**, **supports
+  `realm=poe2`**. Documented and OAuth-gated (Client Credentials).
+- Returns **hourly aggregate digests** of currency-pair trade history (volumes,
+  stock, exchange ratios), cursor-paginated via `next_change_id`. **Historical
+  aggregates only — no live listings, no item-level data.**
+- This is the in-game Currency Exchange / market system. **poe.ninja's PoE2
+  "Economy" section is built on it** ("leverages the game's Currency Exchange
+  system").
+
+### B. Item-level prices → the undocumented `trade2` site API ⚠️ against ToS
+
+- The PoE2 trade *website* (`pathofexile.com/trade2`) is backed by
+  reverse-engineered HTTP endpoints **not in the developer docs**:
+  - `POST https://www.pathofexile.com/api/trade2/search/{league}` → ordered list
+    of result IDs + a query token.
+  - `GET https://www.pathofexile.com/api/trade2/fetch/{ids}?query={queryId}` →
+    listing details, **10 IDs per batch**.
+  - plus `POST /api/trade2/exchange/{league}` (bulk) and `/api/trade2/data/static`.
+- **Auth:** works largely unauthenticated, but a **POESESSID** session cookie
+  raises rate limits and unlocks private leagues. **Cloudflare bot-protection**
+  (CAPTCHAs / IP blocks, worst at league launch) is the real gatekeeper.
+- **Rate limits:** the same dynamic `X-Rate-Limit-*` + `Retry-After` scheme,
+  enforced and easy to trip.
+- ⚠️ **This is against GGG's ToS.** The developer docs state plainly: *"It is
+  against our Terms of Use (section 7i) to reverse-engineer endpoints outside of
+  this documentation"* and *"Requests for access to any other internal website
+  APIs … will be denied."* ToS §7 also forbids scraping (7f) and automation (7c).
+- **poe.ninja uses this for PoE2 item/unique prices** — by its own admission:
+  *"There is no River API for Path of Exile 2 yet, so prices are estimated from
+  the official trade API."*
+
+### C. Derived / aggregated community feeds
+
+- Tools also consume each other: **poeprices.info** (ML price-prediction for rare
+  items), poe.ninja deep-links / currency conversion, and tool-specific backends
+  (e.g. Exiled Exchange 2 serves its own aggregated economy data from
+  `api.exiledexchange2.dev`).
+
+### How the clipboard overlays sidestep the problem (Exiled Exchange 2)
+
+**Exiled Exchange 2** (`Kvan7/Exiled-Exchange-2`, a fork of Awakened PoE Trade) is
+the leading PoE2 price-checker. It never needs a bulk river because it prices
+**one item at a time, on a user keypress**:
+
+1. User hits a hotkey over an in-game item → app reads the **OS clipboard** item
+   text. It does **not** read game memory or inject into the client.
+2. App drives the **`trade2` search + fetch** endpoints through an in-app Electron
+   proxy with **`useSessionCookies: true`**, riding the **user's own logged-in
+   pathofexile.com session** (POESESSID). It honors `X-Rate-Limit-*` headers via
+   a proactive token bucket (default 1 req / 5 s per bucket).
+3. For aggregates it also pulls its own backend + poeprices.info.
+
+This "**one server action per keypress, no game-client interaction, user's own
+session**" pattern is the community's tolerated-in-practice compliance norm —
+**not** an official endorsement (GGG keeps no approved-app allowlist, and there is
+documented precedent of a 2020 ban wave against a different overlay).
+
+### What this means for `poe2-mcp`
+
+- **Currency/economy data is cleanly available** via the official Currency
+  Exchange API with a confidential client + `service:cxapi`. This is the safe
+  foundation.
+- **Item-level live pricing has no sanctioned server-side path.** Every tool that
+  does it scrapes `trade2` (ToS §7i) while relying on a **user's own session +
+  passing Cloudflare** — viable for a desktop overlay tied to a logged-in player,
+  risky/uncertain for a headless server. An MCP server cannot legitimately serve
+  bulk PoE2 item prices the way PoE1 tools serve stash-river data.
+- Realistic options: (a) build on the sanctioned Currency Exchange API; (b) for
+  item prices, act only within a single user's authenticated session + request
+  budget, mirroring the overlay model; and/or (c) consume an existing aggregator
+  rather than scraping `trade2` ourselves.
+
+---
+
+## 5. Authentication — OAuth 2.1 (not OIDC)
 
 GGG implements **OAuth 2.1** (referencing the OAuth 2.1 Authorization Framework
 draft RFC). It is **explicitly not OpenID Connect** — there are no OIDC mentions
@@ -202,7 +291,7 @@ client**:
 
 ---
 
-## 5. Registration / onboarding
+## 6. Registration / onboarding
 
 - **No self-service signup.** *"Registration is currently handled by us directly
   at our discretion. You can make a request by emailing
@@ -218,7 +307,7 @@ client**:
 
 ---
 
-## 6. Other consumption notes
+## 7. Other consumption notes
 
 ### Required User-Agent
 
@@ -263,27 +352,39 @@ Limits are **per-endpoint and dynamic**, communicated via response headers.
 
 ---
 
-## 7. Open questions for `poe2-mcp` (unresolved by research)
+## 8. Open questions for `poe2-mcp` (unresolved by research)
 
 1. **What must the `oauth@grindinggear.com` application contain**, and what's the
    approval turnaround / acceptance bar for an MCP-server use case (given
    LLM-generated requests are auto-rejected)?
-2. **Exactly which endpoints/fields/scopes return meaningful PoE2 data today**
-   via `realm=poe2`? Docs say "limited" but don't enumerate.
-3. **Is there any official PoE2 trade / public-stash data path** (current or
-   forthcoming)? If not, where would PoE2 market data come from?
-4. **Concrete rate-limit values** for the endpoints we'd hit most (profile,
-   characters, leagues, currency-exchange), and whether they differ by client
-   type or realm.
+2. **Exactly which fields/properties does `realm=poe2` return** on the
+   cross-version endpoints (profile, characters, leagues, currency-exchange)?
+   Confirmed *that* they support PoE2; the exact PoE2 payload shape isn't
+   enumerated in the docs.
+3. **Will GGG ship a PoE2 public-stash / trade API?** As of this research there is
+   none and none announced — so item-level pricing has no sanctioned path (see
+   §4). Worth re-checking the changelog periodically.
+4. **Concrete rate-limit values** for the endpoints we'd hit most
+   (currency-exchange; and, if used, `trade2` search/fetch), and whether a
+   confidential client gets higher limits than a user-session (`Account` rule)
+   on `trade2`.
 
 ---
 
-## 8. Sources
+## 9. Sources
 
 **Primary (GGG official):**
-- <https://www.pathofexile.com/developer/docs> · `/authorization` · `/reference` · `/changelog`
+- <https://www.pathofexile.com/developer/docs> · `/index` · `/authorization` · `/reference` · `/changelog`
+- <https://www.pathofexile.com/legal/terms-of-use-and-privacy-policy> (ToS §7 c/f/i — automation/scraping/reverse-engineering)
 - <https://www.pathofexile.com/forum/view-thread/3821465> (staff: docs location + `oauth@` address)
 - <https://www.pathofexile.com/forum/view-thread/3257587> (rate-limit headers, live attestation)
+- <https://www.pathofexile.com/forum/view-thread/3655582> (a real `trade2` search request in the wild)
+
+**Market-data sourcing (follow-up round):**
+- poe.ninja: <https://poe.ninja/posts/poe2-unique-items> ("no River API … estimated from the official trade API") · <https://poe.ninja/posts/poe2-economy-and-rise-of-the-abyssal> (Currency Exchange system)
+- Exiled Exchange 2: <https://github.com/Kvan7/Exiled-Exchange-2> (fork of <https://github.com/SnosMe/awakened-poe-trade>) — `trade2` paths, 10-ID fetch batches, rate-limit buckets, session proxy
+- Awakened PoE Trade FAQ: <https://snosme.github.io/awakened-poe-trade/faq> (clipboard mechanism + tolerance norms)
+- PoB-PoE2 trade system: <https://deepwiki.com/PathOfBuildingCommunity/PathOfBuilding-PoE2/5.1-trade-system>
 
 **Secondary / community (corroborating behavior, treat as stale for PoE2):**
 - <https://github.com/moepmoep12/poe-api-ts> (archived 2023; OAuth/header conventions)
@@ -291,6 +392,8 @@ Limits are **per-endpoint and dynamic**, communicated via response headers.
 - <https://github.com/Chuanhsing/poe-api/blob/master/poe.yaml> (unofficial OpenAPI, outdated)
 - <https://pkg.go.dev/github.com/willroberts/poeapi> (PoE1-era Go client)
 
-**Verification stats:** 16 sources fetched → 68 claims extracted → 25 verified
-(3-vote adversarial) → 22 confirmed / 3 refuted. Confidence on §1–§5 core facts:
-**high**; PoE2-specific coverage details: **evolving**.
+**Verification:** Round 1 — 16 sources → 68 claims → 25 adversarially verified
+(22 confirmed / 3 refuted). Follow-up (§4 market-data) — 3 focused agents, all
+findings source-backed against GGG docs/ToS and the Exiled-Exchange-2 source.
+Confidence on the core docs/auth/coverage facts: **high**; PoE2-specific payload
+details and `trade2` enforcement posture: **evolving / inferred**.
